@@ -21,7 +21,6 @@ RUN apt-get update
 RUN pip install --no-cache-dir -Uq poetry
 WORKDIR /app
 COPY pyproject.toml ./pyproject.toml
-COPY poetry.lock ./poetry.lock
 RUN poetry install --no-cache --no-interaction
 COPY . .
 CMD ["python", "chatbot.py"]
