@@ -37,6 +37,8 @@ from hyperbolic_langchain.agent_toolkits import HyperbolicToolkit
 from hyperbolic_langchain.utils import HyperbolicAgentkitWrapper
 from twitter_langchain import TwitterApiWrapper, TwitterToolkit
 from custom_twitter_actions import create_delete_tweet_tool
+from flask import Flask, request, jsonify
+
 
 # Import local modules
 from utils import (
@@ -362,15 +364,45 @@ def run_autonomous_mode(agent_executor, config):
             print_system("Continuing after error...")
             time.sleep(MENTION_CHECK_INTERVAL)
 
-def main():
-    """Start the chatbot agent."""
-    agent_executor, config = initialize_agent()
-    mode = choose_mode()
+
+app = Flask(__name__)
+
+# HTTP Server Mode
+# Initialize the agent once and reuse it for all requests.
+agent_executor, config = initialize_agent()
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    """Handle chat requests via HTTP."""
+    user_input = request.json.get('message', '')
+
+    if not user_input:
+        return jsonify({"error": "No message provided"}), 400
+
+    response = []
+    for chunk in agent_executor.stream(
+        {"messages": [HumanMessage(content=user_input)]}, config
+    ):
+        if "agent" in chunk:
+            response.append(chunk["agent"]["messages"][0].content)
+        elif "tools" in chunk:
+            response.append(chunk["tools"]["messages"][0].content)
+
+    return jsonify({"response": response})
+
+# def main():
+#     """Start the chatbot agent."""
+#     agent_executor, config = initialize_agent()
+#     mode = choose_mode()
     
-    if mode == "chat":
-        run_chat_mode(agent_executor=agent_executor, config=config)
-    elif mode == "auto":
-        run_autonomous_mode(agent_executor=agent_executor, config=config)
+#     if mode == "chat":
+#         run_chat_mode(agent_executor=agent_executor, config=config)
+#     elif mode == "auto":
+#         run_autonomous_mode(agent_executor=agent_executor, config=config)
+
+def main():
+    """Start the HTTP server."""
+    app.run(host='0.0.0.0', port=3000)
 
 if __name__ == "__main__":
     print("Starting Agent...")
