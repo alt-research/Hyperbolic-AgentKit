@@ -23,4 +23,4 @@ WORKDIR /app
 COPY pyproject.toml ./pyproject.toml
 RUN poetry install --no-cache --no-interaction
 COPY . .
-CMD ["python", "chatbot.py"]
+CMD ["poetry", "run", "python", "chatbot.py"]
