@@ -1,11 +1,10 @@
 import os
 import sys
-from dotenv import load_dotenv
 from datetime import datetime
 import time
 
 # Load environment variables from .env file
-load_dotenv()
+# load_dotenv()
 
 # Add the parent directory to PYTHONPATH
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -402,7 +401,7 @@ def chat():
 
 def main():
     """Start the HTTP server."""
-    app.run(host='0.0.0.0', port=3000)
+    app.run(host='0.0.0.0', port=5000)
 
 if __name__ == "__main__":
     print("Starting Agent...")
